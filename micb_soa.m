@@ -174,8 +174,7 @@ for k = -(practiceTrials+1):length(trialList)
     HideCursor
     jitter = round(((-1)^round(rand))*rand*jitterSize);
     changePoint = xc + jitter;
-    changeOccurs = 0;
-    trialOver = 0;
+
 
     phase = randi([0 360],numberOfGabors,1);   
     Screen('FillRect',w,bgcolor,rect);  
@@ -187,7 +186,9 @@ for k = -(practiceTrials+1):length(trialList)
     WaitSecs(fixationPause);   
     stimulusOnset = GetSecs;
     
-
+    changeOccurs = 0;
+    moveOccurs = 0; %need another flag
+    trialOver = 0;
     movementIncrement = repmat([movementSpeed 0 movementSpeed 0],numberOfGabors,1);
     movementIncrement = movementIncrement';
     fprintf(num2str(movementIncrement))
