@@ -124,36 +124,38 @@ for k = -(practiceTrials+1):length(trialList)
     rotation = round(rand(1,numberOfGabors)*360);
     gaborPatch = Screen('MakeTexture',w,gaborMatrix);
 
+    %%%%%%%%
+    %%%%%%%%
+    %%%%%%%%
+
     %% STIMULUS CODE %%
     HideCursor
     changePoint = xc;
     changeOccurs = 0;
     trialOver = 0;
-    movementIncrement = repmat([movementSpeed 0 movementSpeed 0],numberOfGabors,1);
-    movementIncrement = movementIncrement';
+    movementIncrement = repmat([movementSpeed 0 movementSpeed 0],numberOfGabors,1)';
     phase = randi([0 360],numberOfGabors,1);  
 
     DrawStim()
     WaitSecs(fixationPause);        
     stimulusOnset = GetSecs;
 
+
+
     while ~changeOccurs   
         DrawStim();
+        MoveStim();
         %counts down to zero by 3 then switches
-        if ((-1)^(direction+1))*(centerOfArray(1)-changePoint) > 0     
-            MoveStim();
-        else  % time for a change
-            MoveStim();
+        if abs(centerOfArray(1)-changePoint) < 1     
             changeOccurs = 1;
         end
     end
 
     %% Direction Change
     rotation(target) = rotation(target)+rotationSize;
+
     movementIncrement = repmat(movementSpeed.*[cosd(angle) ...
-                        sind(angle) cosd(angle) sind(angle)],numberOfGabors,1);
-    movementIncrement = movementIncrement';
-    bendTime = GetSecs - stimulusOnset;
+                        sind(angle) cosd(angle) sind(angle)],numberOfGabors,1)';
 
     while ~trialOver
         DrawStim()
@@ -166,6 +168,11 @@ for k = -(practiceTrials+1):length(trialList)
             MoveStim();
         end
     end
+
+
+    %%%%%%%%
+    %%%%%%%%
+    %%%%%%%%
 
     %% Probe %%
     Screen('FillRect',w,bgcolor,rect);
