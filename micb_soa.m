@@ -12,7 +12,7 @@ clc;
 seed = ceil(sum(clock)*1000);
 rand('twister',seed);
 
-global w bgcolor rect gaborPatch arrayRects rotation centerOfArray fixationSize fixationColor fixationRect
+global w bgcolor rect gaborPatch arrayRects rotation centerOfArray direction movementIncrement fixationSize fixationColor fixationRect
 
 %% Basic parameters
 bgcolor = [128 128 128];
@@ -123,45 +123,41 @@ for k = -(practiceTrials+1):length(trialList)
 
     %% Trial code
     HideCursor
-
     changePoint = xc;
     changeOccurs = 0;
     trialOver = 0;
     movementIncrement = repmat([movementSpeed 0 movementSpeed 0],numberOfGabors,1);
     movementIncrement = movementIncrement';
     phase = randi([0 360],numberOfGabors,1);  
-    
-    DrawStim()
 
+    DrawStim()
     WaitSecs(fixationPause);        
     stimulusOnset = GetSecs;
     while ~changeOccurs   
-
-        DrawStim()
-
+        DrawStim();
         %counts down to zero by 3 then switches
         if ((-1)^(direction+1))*(centerOfArray(1)-changePoint) > 0     
-            arrayRects = arrayRects + ((-1)^direction)*movementIncrement;
+            MoveStim();
         else  % time for a change
-            arrayRects = arrayRects + ((-1)^direction)*movementIncrement;
+            MoveStim();
             changeOccurs = 1;
         end
     end
-    
     %% Direction Change
     rotation(target) = rotation(target)+rotationSize;
-    movementIncrement = repmat(movementSpeed.*[cosd(angle) sind(angle) cosd(angle) sind(angle)],numberOfGabors,1);
+    movementIncrement = repmat(movementSpeed.*[cosd(angle) ...
+                        sind(angle) cosd(angle) sind(angle)],numberOfGabors,1);
     movementIncrement = movementIncrement';
     bendTime = GetSecs - stimulusOnset;
-   
     while ~trialOver
-
         DrawStim()
-
-        if max(arrayRects(3,:)) > rect(3)-xBorder || max(arrayRects(4,:)) > rect(4)-yBorder || min(arrayRects(3,:)) < xBorder || min(arrayRects(4,:)) < yBorder
+        if max(arrayRects(3,:)) > rect(3)-xBorder || ...
+                max(arrayRects(4,:)) > rect(4)-yBorder ||...
+                min(arrayRects(3,:)) < xBorder ||...
+                min(arrayRects(4,:)) < yBorder;
             trialOver = 1;
         else
-            arrayRects = arrayRects + ((-1)^direction)*movementIncrement;
+            MoveStim();
         end
     end
 
@@ -225,6 +221,11 @@ for k = -(practiceTrials+1):length(trialList)
 end
 fclose('all');
 Screen('CloseAll');
+
+function MoveStim()
+    global arrayRects direction movementIncrement
+    arrayRects = arrayRects + ((-1)^direction)*movementIncrement;
+end
 
 function DrawStim() 
     global w bgcolor rect gaborPatch arrayRects rotation centerOfArray fixationSize fixationColor fixationRect
