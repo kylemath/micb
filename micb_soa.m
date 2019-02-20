@@ -1,20 +1,10 @@
-% Motion-Induced Change Blindness, v.1.2
+% Motion-Induced Change Blindness, 
 % Developed by Richard Yao
-%
-% The code below, paired with the functions micb1_blind and micb1_control,
-% display an array of gabor patches that the subject must track vertically
-% then horizontally.  The sudden change in direction introduces a motion
-% transient that effectively blocks the change.
-%
-% The current code only has the array move downwards then to the right.
-% The change can either occur at the moment of directional change or
-% halfway along its horizontal movement path.
-%
-% This version of the code circumvents a problem on older computers with the
-% CreateProceduralGabor function and simply uses an image of a Gabor.
-%
-% This particular version adds easy manipulation of the number of gabors,
-% as well as cleaning up a lot of messy code.
+% Modified by Katherine Wood 
+% Modified by Kyle Mathewson 
+
+%to test asynchrony between change and motion change
+
 
 clear all
 Screen('Preference', 'SkipSyncTests', 1)
@@ -162,7 +152,6 @@ for k = -(practiceTrials+1):length(trialList)
     rotation(target) = rotation(target)+rotationSize;
     movementIncrement = repmat(movementSpeed.*[cosd(angle) sind(angle) cosd(angle) sind(angle)],numberOfGabors,1);
     movementIncrement = movementIncrement';
-
     bendTime = GetSecs - stimulusOnset;
    
     while ~trialOver
@@ -175,32 +164,21 @@ for k = -(practiceTrials+1):length(trialList)
             arrayRects = arrayRects + ((-1)^direction)*movementIncrement;
         end
     end
-    
+
+    %% Probe %%
     Screen('FillRect',w,bgcolor,rect);
     Screen('Flip',w);
     WaitSecs(.1);
-    
-    %% Probe
-    
     ShowCursor;
-    
     Screen('FillRect',w,bgcolor,rect);
-    
     DrawFormattedText(w,'Click the patch that rotated:','center',yc-r-g);
-    
     Screen('DrawTextures',w,gaborPatch,[],centeredRects,rotation);
-    
     Screen('FillOval',w,fixationColor,[xc-fixationSize yc-fixationSize xc+fixationSize yc+fixationSize]);
-    
     Screen('Flip',w);
     
-    
     accuracy = 2;
-    
     startTime = GetSecs;
-    
     clicked = 0;
-    
     while GetSecs-startTime<timeLimit && ~clicked
         [x y buttons] = GetMouse;
         if any(buttons)
@@ -232,38 +210,24 @@ for k = -(practiceTrials+1):length(trialList)
         RT = timeLimit;
     end
     
-    
     WaitSecs(feedbackPause);
-    
     Screen('FillRect',w,bgcolor,rect);
-    
     Screen('flip',w);
     
     %% Data File
-    
-    time = fix(clock);
-    timestamp = [num2str(time(1)) '/' num2str(time(2)) '/' num2str(time(3)) '||' num2str(time(4)) ':' num2str(time(5)) ':' num2str(time(6))];
-    
-    directionName = directionNames{direction+1};
-    
+    % time = fix(clock);
+    % timestamp = [num2str(time(1)) '/' num2str(time(2)) '/' num2str(time(3)) '||' num2str(time(4)) ':' num2str(time(5)) ':' num2str(time(6))];
+    % directionName = directionNames{direction+1};
     % fprintf(dataFile,'%s\t%d\t%f\t%d\t%s\t%f\t%f\t%s\t%s\t%f\t%d\t%d\t%d\t%f\t%f\t%d\t%f\t%f\n',...
     %     trialNum,subject,seed,age,sex,r,g,timestamp,directionName,angle,target,movementSpeed,rotationSize,x,y,accuracy,RT,bendTime);
 
-    
-    
-    Screen('Close');
-    
+    Screen('Close');  
 end
-
 fclose('all');
-
-
-
 Screen('CloseAll');
 
 function DrawStim() 
     global w bgcolor rect gaborPatch arrayRects rotation centerOfArray fixationSize fixationColor fixationRect
-
     Screen('FillRect',w,bgcolor,rect);  
     Screen('DrawTextures',w,gaborPatch,[],arrayRects,rotation); 
     centerOfArray = [(min(arrayRects(1,:))+max(arrayRects(3,:)))/2 (min(arrayRects(2,:))+max(arrayRects(4,:)))/2];
