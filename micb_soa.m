@@ -41,7 +41,6 @@ gaborSize = g;
 % stimulus motion parameters
 movementSpeed = 3;
 rotationSize = 30;
-practiceRotationHandicap = 15;
 
 % trial parameters
 practiceTrials = 10;
@@ -117,7 +116,7 @@ for k = -(practiceTrials+1):length(trialList)
     arrayRects = arrayRects';
 
     %% Gabors
-    rotation = round(rand(1,numberOfGabors)*360);
+    rotation = round(rand(1, numberOfGabors) * 360);
     gaborPatch = Screen('MakeTexture',w,gaborMatrix);
 
     %%%%%%%%
@@ -126,42 +125,45 @@ for k = -(practiceTrials+1):length(trialList)
 
     %% STIMULUS CODE %%
     HideCursor
-    changePoint = xc;
-    changeOccurs = 0;
+    motion_changePoint = xc;
+   
+    change_soa = -10;
+    gabor_changePoint = motion_changePoint + change_soa;
+    
     trialOver = 0;
+    motionOver = 0; %motion change
+    gaborOver = 0; %gabor change
     movementIncrement = repmat([movementSpeed 0 movementSpeed 0],numberOfGabors,1)';
-
     DrawStim()
     WaitSecs(fixationPause); 
-
-    while ~changeOccurs   
-        DrawStim();
-        MoveStim();
-        %counts down to zero by 3 then switches
-        if abs(centerOfArray(1)-changePoint) < 1     
-            changeOccurs = 1;
-        end
-    end
-
-    %% Direction Change
-    rotation(target) = rotation(target)+rotationSize;
-
-    %% Movement Change
-    movementIncrement = repmat(movementSpeed.*[cosd(angle) ...
-                        sind(angle) cosd(angle) sind(angle)],numberOfGabors,1)';
-
     while ~trialOver
-        DrawStim()
-        if max(arrayRects(3,:)) > rect(3)-xBorder || ...
-                max(arrayRects(4,:)) > rect(4)-yBorder ||...
-                min(arrayRects(3,:)) < xBorder ||...
-                min(arrayRects(4,:)) < yBorder;
-            trialOver = 1;
-        else
-            MoveStim();
-        end
-    end
 
+        %check if reached the edge and set flag
+        if max(arrayRects(3, :)) > rect(3)-xBorder || ...
+                max(arrayRects(4, :)) > rect(4)-yBorder || ...
+                min(arrayRects(3, :)) < xBorder || ...
+                min(arrayRects(4, :)) < yBorder;
+            trialOver = 1;
+        end
+
+        %check for first motion change point and flag
+        if abs(centerOfArray(1)-motion_changePoint) < 1 & ~motionOver
+            motionOver = 1
+            %Change movement direction
+            movementIncrement = repmat(movementSpeed.*[cosd(angle) ...
+                                    sind(angle) cosd(angle) sind(angle)], ...
+                                    numberOfGabors, 1)';
+        end
+
+        if abs(centerOfArray(1)-motion_changePoint) < 1 & ~gaborOver
+            gaborOver = 1
+            %Change Gabor angle
+            rotation(target) = rotation(target) + rotationSize;
+        end
+
+        MoveStim()
+        DrawStim()
+    end
 
     %%%%%%%%
     %%%%%%%%
