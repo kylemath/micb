@@ -12,7 +12,8 @@ clc;
 seed = ceil(sum(clock)*1000);
 rand('twister',seed);
 
-global w bgcolor rect gaborPatch arrayRects rotation centerOfArray direction movementIncrement fixationSize fixationColor fixationRect
+global w bgcolor rect gaborPatch arrayRects rotation centerOfArray ...
+    direction movementIncrement fixationSize fixationColor fixationRect
 
 %% Basic parameters
 bgcolor = [128 128 128];
@@ -73,7 +74,8 @@ for i = 1:numberOfGabors
     arrayCenters(i,2) = r*sin((i-1)*(2*pi/numberOfGabors));
 end
 arrayCenters = round(arrayCenters);
-centeredRects = [arrayCenters arrayCenters] + round(repmat([xc-g/2 yc-g/2 xc+g/2 yc+g/2],numberOfGabors,1));
+centeredRects = [arrayCenters arrayCenters] + ...
+        round(repmat([xc-g/2 yc-g/2 xc+g/2 yc+g/2],numberOfGabors,1));
 centeredRects = centeredRects';
 
 %% Experiment %%
@@ -109,7 +111,8 @@ for k = -(practiceTrials+1):length(trialList)
     end
 
     %Stimuli bounds
-    arrayRects = [arrayCenters arrayCenters] + round(repmat([g/2+r-g/2 yc-g/2 g/2+r+g/2 yc+g/2],numberOfGabors,1));
+    arrayRects = [arrayCenters arrayCenters] + ...
+                round(repmat([g/2+r-g/2 yc-g/2 g/2+r+g/2 yc+g/2],numberOfGabors,1));
     if direction
         arrayRects = arrayRects + repmat([-(2*r+g)+rect(3)-xBorder 0],numberOfGabors,2);
     else
@@ -121,7 +124,7 @@ for k = -(practiceTrials+1):length(trialList)
     rotation = round(rand(1,numberOfGabors)*360);
     gaborPatch = Screen('MakeTexture',w,gaborMatrix);
 
-    %% Trial code
+    %% STIMULUS CODE %%
     HideCursor
     changePoint = xc;
     changeOccurs = 0;
@@ -133,6 +136,7 @@ for k = -(practiceTrials+1):length(trialList)
     DrawStim()
     WaitSecs(fixationPause);        
     stimulusOnset = GetSecs;
+
     while ~changeOccurs   
         DrawStim();
         %counts down to zero by 3 then switches
@@ -143,12 +147,14 @@ for k = -(practiceTrials+1):length(trialList)
             changeOccurs = 1;
         end
     end
+
     %% Direction Change
     rotation(target) = rotation(target)+rotationSize;
     movementIncrement = repmat(movementSpeed.*[cosd(angle) ...
                         sind(angle) cosd(angle) sind(angle)],numberOfGabors,1);
     movementIncrement = movementIncrement';
     bendTime = GetSecs - stimulusOnset;
+
     while ~trialOver
         DrawStim()
         if max(arrayRects(3,:)) > rect(3)-xBorder || ...
