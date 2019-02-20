@@ -137,11 +137,8 @@ for k = -(practiceTrials+1):length(trialList)
     phase = randi([0 360],numberOfGabors,1);  
 
     DrawStim()
-    WaitSecs(fixationPause);        
-    stimulusOnset = GetSecs;
-
-
-
+    WaitSecs(fixationPause); 
+           
     while ~changeOccurs   
         DrawStim();
         MoveStim();
@@ -154,6 +151,7 @@ for k = -(practiceTrials+1):length(trialList)
     %% Direction Change
     rotation(target) = rotation(target)+rotationSize;
 
+    %% Movement Change
     movementIncrement = repmat(movementSpeed.*[cosd(angle) ...
                         sind(angle) cosd(angle) sind(angle)],numberOfGabors,1)';
 
