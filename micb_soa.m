@@ -81,14 +81,10 @@ centeredRects = centeredRects';
 %% Experiment %%
 
 %Instructions
-rotation = round(rand(1,numberOfGabors)*360);
-target = ceil(rand()*numberOfGabors);
-phase = randi([0 360],numberOfGabors,1);
 Screen('FillRect',w,bgcolor);
 DrawFormattedText(w,'PRACTICE TRIALS','center','center');
 Screen('Flip',w)
 WaitSecs(1);
-
 
 %% experiment
 for k = -(practiceTrials+1):length(trialList)
@@ -134,11 +130,10 @@ for k = -(practiceTrials+1):length(trialList)
     changeOccurs = 0;
     trialOver = 0;
     movementIncrement = repmat([movementSpeed 0 movementSpeed 0],numberOfGabors,1)';
-    phase = randi([0 360],numberOfGabors,1);  
 
     DrawStim()
     WaitSecs(fixationPause); 
-           
+
     while ~changeOccurs   
         DrawStim();
         MoveStim();
