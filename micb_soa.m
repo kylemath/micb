@@ -16,44 +16,23 @@
 % This particular version adds easy manipulation of the number of gabors,
 % as well as cleaning up a lot of messy code.
 
-%% Opening stuff
-
 clear all
-
-% warning off
-
 Screen('Preference', 'SkipSyncTests', 1)
-
 clc;
-
-eyetrack = 0 %input('EXPERIMENTER: enable eyetracking (1 = yes, 0 = no)? ');
-
-clc;
-
-% subject = input('Subject Number: ');
-% age = input('Age: ');
-% sex = input('Sex (M/F): ','s');
-
 seed = ceil(sum(clock)*1000);
 rand('twister',seed);
 
+global w bgcolor rect gaborPatch arrayRects rotation centerOfArray fixationSize fixationColor fixationRect
+
 %% Basic parameters
-
 bgcolor = [128 128 128];
-
-% [w rect] = Screen('OpenWindow',0,bgcolor,[0 0 1300 800]);
 [w rect] = Screen('OpenWindow',0,bgcolor);
 xc = rect(3)./2;
 yc = rect(4)./2;
-
 xBorder = round(rect(3)./6);
 yBorder = round(rect(4)./6);
-
 textSize = round(rect(4)*.02);
 Screen('TextSize',w,textSize);
-
-wrapat = 50;
-
 directionNames = {'Right' 'Left'};
 
 % fixation parameters
@@ -64,34 +43,23 @@ fixationSize = 2;
 % gabor array parameters
 numberOfGabors = 8;
 arrayCenters = zeros(numberOfGabors,2);
-
-SCREEN_HEIGHT = rect(4);
-SCREEN_WIDTH = rect(3);
-
 r = round(rect(4)./10);
 g = round(.8*r);
 gaborSize = g;
 
-
 % stimulus motion parameters
-
 movementSpeed = 3;
 rotationSize = 30;
 practiceRotationHandicap = 15;
 
-jitterSize = 0;
-
 % trial parameters
-
 practiceTrials = 10;
 breakEvery = 50;
 timeLimit = 5;
 feedbackPause = .5;
 
-Screen('BlendFunction',w,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 %% Read in image
-
+Screen('BlendFunction',w,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 [gaborMatrix map alpha] = imread('single_gabor_75px.png');
 gaborMatrix(:,:,4) = alpha(:,:);
 gaborPatch = Screen('MakeTexture',w,gaborMatrix);
@@ -107,41 +75,32 @@ trialList = trialList(:,randperm(length(trialList)));
 practiceList = trialList(:,randperm(length(trialList)));
 trialList = trialList';
 practiceList = practiceList';
-
 totalTrials = length(trialList);
 
 %% Array Center Points
-
 for i = 1:numberOfGabors
     arrayCenters(i,1) = r*cos((i-1)*(2*pi/numberOfGabors));
     arrayCenters(i,2) = r*sin((i-1)*(2*pi/numberOfGabors));
 end
-
 arrayCenters = round(arrayCenters);
 centeredRects = [arrayCenters arrayCenters] + round(repmat([xc-g/2 yc-g/2 xc+g/2 yc+g/2],numberOfGabors,1));
 centeredRects = centeredRects';
 
-%% Experiment
+%% Experiment %%
 
 %Instructions
-
 rotation = round(rand(1,numberOfGabors)*360);
 target = ceil(rand()*numberOfGabors);
-
-proceed = 0;
-
-sinceTwist = GetSecs;
-twistModifier = 1;
-
 phase = randi([0 360],numberOfGabors,1);
-
 Screen('FillRect',w,bgcolor);
 DrawFormattedText(w,'PRACTICE TRIALS','center','center');
 Screen('Flip',w)
 WaitSecs(1);
 
+
 %% experiment
 for k = -(practiceTrials+1):length(trialList)
+    %Trial type
     if k < 0
         direction = practiceList(-k,3);
         target = practiceList(-k,1);
@@ -158,6 +117,8 @@ for k = -(practiceTrials+1):length(trialList)
         angle = trialList(k,2);
         trialNum = num2str(k);
     end
+
+    %Stimuli bounds
     arrayRects = [arrayCenters arrayCenters] + round(repmat([g/2+r-g/2 yc-g/2 g/2+r+g/2 yc+g/2],numberOfGabors,1));
     if direction
         arrayRects = arrayRects + repmat([-(2*r+g)+rect(3)-xBorder 0],numberOfGabors,2);
@@ -172,37 +133,24 @@ for k = -(practiceTrials+1):length(trialList)
 
     %% Trial code
     HideCursor
-    jitter = round(((-1)^round(rand))*rand*jitterSize);
-    changePoint = xc + jitter;
 
-
-    phase = randi([0 360],numberOfGabors,1);   
-    Screen('FillRect',w,bgcolor,rect);  
-    Screen('DrawTextures',w,gaborPatch,[],arrayRects,rotation); 
-    centerOfArray = [(min(arrayRects(1,:))+max(arrayRects(3,:)))/2 (min(arrayRects(2,:))+max(arrayRects(4,:)))/2];
-    fixationRect = round([centerOfArray(1)-fixationSize centerOfArray(2)-fixationSize centerOfArray(1)+fixationSize centerOfArray(2)+fixationSize]);
-    Screen('FillOval',w,fixationColor,fixationRect);  
-    Screen('Flip',w);
-    WaitSecs(fixationPause);   
-    stimulusOnset = GetSecs;
-    
+    changePoint = xc;
     changeOccurs = 0;
-    moveOccurs = 0; %need another flag
     trialOver = 0;
     movementIncrement = repmat([movementSpeed 0 movementSpeed 0],numberOfGabors,1);
     movementIncrement = movementIncrement';
-    fprintf(num2str(movementIncrement))
-    while ~changeOccurs       
-        Screen('FillRect',w,bgcolor,rect);       
-        Screen('DrawTextures',w,gaborPatch,[],arrayRects,rotation);       
-        centerOfArray = [(min(arrayRects(1,:))+max(arrayRects(3,:)))/2 (min(arrayRects(2,:))+max(arrayRects(4,:)))/2];
-        fixationRect = round([centerOfArray(1)-fixationSize centerOfArray(2)-fixationSize centerOfArray(1)+fixationSize centerOfArray(2)+fixationSize]);
-        Screen('FillOval',w,fixationColor,fixationRect); 
-        Screen('Flip',w);
-        fprintf([num2str(((-1)^(direction+1))*(centerOfArray(1)-changePoint)), '\n'])
+    phase = randi([0 360],numberOfGabors,1);  
+    
+    DrawStim()
+
+    WaitSecs(fixationPause);        
+    stimulusOnset = GetSecs;
+    while ~changeOccurs   
+
+        DrawStim()
+
         %counts down to zero by 3 then switches
         if ((-1)^(direction+1))*(centerOfArray(1)-changePoint) > 0     
-
             arrayRects = arrayRects + ((-1)^direction)*movementIncrement;
         else  % time for a change
             arrayRects = arrayRects + ((-1)^direction)*movementIncrement;
@@ -214,23 +162,18 @@ for k = -(practiceTrials+1):length(trialList)
     rotation(target) = rotation(target)+rotationSize;
     movementIncrement = repmat(movementSpeed.*[cosd(angle) sind(angle) cosd(angle) sind(angle)],numberOfGabors,1);
     movementIncrement = movementIncrement';
-    fprintf(num2str(movementIncrement))
 
     bendTime = GetSecs - stimulusOnset;
-        
+   
     while ~trialOver
-        Screen('FillRect',w,bgcolor,rect);
-        Screen('DrawTextures',w,gaborPatch,[],arrayRects,rotation);
-        centerOfArray = [(min(arrayRects(1,:))+max(arrayRects(3,:)))/2 (min(arrayRects(2,:))+max(arrayRects(4,:)))/2];
-        fixationRect = round([centerOfArray(1)-fixationSize centerOfArray(2)-fixationSize centerOfArray(1)+fixationSize centerOfArray(2)+fixationSize]);
-        Screen('FillOval',w,fixationColor,fixationRect);
-        Screen('Flip',w);
+
+        DrawStim()
+
         if max(arrayRects(3,:)) > rect(3)-xBorder || max(arrayRects(4,:)) > rect(4)-yBorder || min(arrayRects(3,:)) < xBorder || min(arrayRects(4,:)) < yBorder
             trialOver = 1;
         else
             arrayRects = arrayRects + ((-1)^direction)*movementIncrement;
         end
-        
     end
     
     Screen('FillRect',w,bgcolor,rect);
@@ -317,3 +260,14 @@ fclose('all');
 
 
 Screen('CloseAll');
+
+function DrawStim() 
+    global w bgcolor rect gaborPatch arrayRects rotation centerOfArray fixationSize fixationColor fixationRect
+
+    Screen('FillRect',w,bgcolor,rect);  
+    Screen('DrawTextures',w,gaborPatch,[],arrayRects,rotation); 
+    centerOfArray = [(min(arrayRects(1,:))+max(arrayRects(3,:)))/2 (min(arrayRects(2,:))+max(arrayRects(4,:)))/2];
+    fixationRect = round([centerOfArray(1)-fixationSize centerOfArray(2)-fixationSize centerOfArray(1)+fixationSize centerOfArray(2)+fixationSize]);
+    Screen('FillOval',w,fixationColor,fixationRect);  
+    Screen('Flip',w);
+end
