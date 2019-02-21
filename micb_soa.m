@@ -126,10 +126,7 @@ for k = -(practiceTrials+1):length(trialList)
     %% STIMULUS CODE %%
     HideCursor
     motion_changePoint = xc;
-   
-    change_soa = -10;
-    gabor_changePoint = motion_changePoint + change_soa;
-    
+    gabor_changePoint = motion_changePoint;
     trialOver = 0;
     motionOver = 0; %motion change
     gaborOver = 0; %gabor change
@@ -148,15 +145,15 @@ for k = -(practiceTrials+1):length(trialList)
 
         %check for first motion change point and flag
         if abs(centerOfArray(1)-motion_changePoint) < 1 & ~motionOver
-            motionOver = 1
+            motionOver = 1;
             %Change movement direction
             movementIncrement = repmat(movementSpeed.*[cosd(angle) ...
                                     sind(angle) cosd(angle) sind(angle)], ...
                                     numberOfGabors, 1)';
         end
 
-        if abs(centerOfArray(1)-motion_changePoint) < 1 & ~gaborOver
-            gaborOver = 1
+        if abs(centerOfArray(1)-gabor_changePoint) < 1 & ~gaborOver
+            gaborOver = 1;
             %Change Gabor angle
             rotation(target) = rotation(target) + rotationSize;
         end
