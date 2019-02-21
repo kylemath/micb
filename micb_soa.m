@@ -125,17 +125,27 @@ for k = -(practiceTrials+1):length(trialList)
 
     %% STIMULUS CODE %%
     HideCursor
+    
     motion_changePoint = xc;
-    gabor_changePoint = motion_changePoint;
+    motion_flexion_height = yc;
+
+    %%%
+    gabor_soa_frames = 0; % negative before motion 
+    %%%
+
+    gabor_soa_frames = -gabor_soa_frames; %switch sign
+    gabor_changePoint = gabor_soa_frames * 3; % moves three pixels on each frame
+    
     trialOver = 0;
-    motionOver = 0; %motion change
-    gaborOver = 0; %gabor change
+    motionOver = 0; % motion change
+    gaborOver = 0; % gabor change
     movementIncrement = repmat([movementSpeed 0 movementSpeed 0],numberOfGabors,1)';
     DrawStim()
     WaitSecs(fixationPause); 
+
     while ~trialOver
 
-        %check if reached the edge and set flag
+        % check if reached the edge and set flag
         if max(arrayRects(3, :)) > rect(3)-xBorder || ...
                 max(arrayRects(4, :)) > rect(4)-yBorder || ...
                 min(arrayRects(3, :)) < xBorder || ...
@@ -143,16 +153,21 @@ for k = -(practiceTrials+1):length(trialList)
             trialOver = 1;
         end
 
-        %check for first motion change point and flag
-        if abs(centerOfArray(1)-motion_changePoint) < 1 & ~motionOver
+        % check for first motion change point, change, and flag
+        motion_howfar = ((-1) ^ (direction+1)) * (centerOfArray(1) - motion_changePoint) + ...
+                        (-1) * abs(centerOfArray(2) - motion_flexion_height);
+        if motion_howfar < 1 & ~motionOver
             motionOver = 1;
-            %Change movement direction
+            % Change movement direction
             movementIncrement = repmat(movementSpeed.*[cosd(angle) ...
                                     sind(angle) cosd(angle) sind(angle)], ...
                                     numberOfGabors, 1)';
         end
 
-        if abs(centerOfArray(1)-gabor_changePoint) < 1 & ~gaborOver
+        % check for gabor change point, change, and flag
+        gabor_howfar = ((-1) ^ (direction+1)) * (centerOfArray(1) - motion_changePoint) + ...
+                       (-1) * abs(centerOfArray(2) - motion_flexion_height);
+        if gabor_howfar < gabor_changePoint & ~gaborOver
             gaborOver = 1;
             %Change Gabor angle
             rotation(target) = rotation(target) + rotationSize;
