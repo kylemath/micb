@@ -264,6 +264,26 @@ fclose('all');
 Screen('CloseAll');
 
 
+turn_trials = out_angle ~= 0;
+control_trials = out_angle == 0;
+responded = out_accuracy ~= 2;
+
+isoa = 0;
+for this_soa = soas
+    isoa = isoa + 1;
+    temp_turn = out_accuracy(out_soa == this_soa & responded & turn_trials);
+    turn_out(isoa) = sum(temp_turn)/length(temp_turn);
+    temp_cont = out_accuracy(out_soa == this_soa & responded & control_trials);
+    control_out(isoa) = sum(temp_cont)/length(temp_cont);
+end
+
+figure; 
+plot(soas,turn_out,'r',soas,control_out,'b'); 
+legend({'Flexion','Control'});
+xlabel('Gabor Change First < ------ SOA (frames) ------ > Gabor Change After')
+ylabel('Detection Proportion')
+ylim([.5 1.05])
+
 function MoveStim()
     global arrayRects direction movementIncrement
     arrayRects = arrayRects + ((-1)^direction)*movementIncrement;
