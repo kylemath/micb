@@ -43,7 +43,7 @@ movementSpeed = 3;
 rotationSize = 30;
 
 % trial parameters
-practiceTrials = 10;
+practiceTrials = 2;
 breakEvery = 50;
 timeLimit = 5;
 feedbackPause = .5;
@@ -56,11 +56,13 @@ gaborPatch = Screen('MakeTexture',w,gaborMatrix);
 
 %% Counterbalancing
 reps = 5; % Number of reps per angle condition per direction
-trialList = [repmat(1:numberOfGabors,1,3*reps);...
-    zeros(1,numberOfGabors*reps) ...
+trialList = [repmat(1:numberOfGabors,1,3*reps);...  %list of which target
+    zeros(1,numberOfGabors*reps) ...  %list of which angle
     repmat(90,1,numberOfGabors*reps)...
     repmat(270,1,numberOfGabors*reps)];
-trialList = [trialList trialList; zeros(1,numberOfGabors*3*reps) ones(1,numberOfGabors*3*reps)];
+    %list of which direction
+trialList = [trialList trialList; ...
+        zeros(1,numberOfGabors*3*reps) ones(1,numberOfGabors*3*reps)]; 
 trialList = trialList(:,randperm(length(trialList)));
 practiceList = trialList(:,randperm(length(trialList)));
 trialList = trialList';
@@ -77,6 +79,17 @@ centeredRects = [arrayCenters arrayCenters] + ...
         round(repmat([xc-g/2 yc-g/2 xc+g/2 yc+g/2],numberOfGabors,1));
 centeredRects = centeredRects';
 
+
+%pick soas
+soas = [-3:3];
+nsoas = length(soas)
+
+%outputs
+out_soa = [];
+out_direction = []; 
+out_angle = [];  
+out_accuracy = [];
+out_RT = [];
 %% Experiment %%
 
 %Instructions
@@ -87,6 +100,10 @@ WaitSecs(1);
 
 %% experiment
 for k = -(practiceTrials+1):length(trialList)
+    
+    %pick SOA
+    this_soa = soas(randi(nsoas));
+
     %Trial type
     if k < 0
         direction = practiceList(-k,3);
@@ -130,7 +147,7 @@ for k = -(practiceTrials+1):length(trialList)
     motion_flexion_height = yc;
 
     %%%
-    gabor_soa_frames = 0; % negative before motion 
+    gabor_soa_frames = this_soa; % negative before motion 
     %%%
 
     gabor_soa_frames = -gabor_soa_frames; %switch sign
@@ -159,6 +176,7 @@ for k = -(practiceTrials+1):length(trialList)
         if motion_howfar < 1 & ~motionOver
             motionOver = 1;
             % Change movement direction
+
             movementIncrement = repmat(movementSpeed.*[cosd(angle) ...
                                     sind(angle) cosd(angle) sind(angle)], ...
                                     numberOfGabors, 1)';
@@ -176,6 +194,7 @@ for k = -(practiceTrials+1):length(trialList)
         MoveStim()
         DrawStim()
     end
+
 
     %%%%%%%%
     %%%%%%%%
@@ -229,18 +248,21 @@ for k = -(practiceTrials+1):length(trialList)
     WaitSecs(feedbackPause);
     Screen('FillRect',w,bgcolor,rect);
     Screen('flip',w);
-    
-    %% Data File
-    % time = fix(clock);
-    % timestamp = [num2str(time(1)) '/' num2str(time(2)) '/' num2str(time(3)) '||' num2str(time(4)) ':' num2str(time(5)) ':' num2str(time(6))];
-    % directionName = directionNames{direction+1};
-    % fprintf(dataFile,'%s\t%d\t%f\t%d\t%s\t%f\t%f\t%s\t%s\t%f\t%d\t%d\t%d\t%f\t%f\t%d\t%f\t%f\n',...
-    %     trialNum,subject,seed,age,sex,r,g,timestamp,directionName,angle,target,movementSpeed,rotationSize,x,y,accuracy,RT,bendTime);
+
+    if k>0
+        out_soa = [out_soa this_soa];
+        out_direction = [out_direction direction]; 
+        out_angle = [out_angle angle];  %270 left, 90 Right, 0 straight
+        out_accuracy = [out_accuracy accuracy];
+        out_RT = [out_RT RT];
+    end
+
 
     Screen('Close');  
 end
 fclose('all');
 Screen('CloseAll');
+
 
 function MoveStim()
     global arrayRects direction movementIncrement
