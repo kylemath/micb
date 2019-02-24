@@ -48,6 +48,10 @@ breakEvery = 50;
 timeLimit = 5;
 feedbackPause = .5;
 
+%pick soas
+soas = [-10:2:10];
+nsoas = length(soas)
+
 %% Read in image
 Screen('BlendFunction',w,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 [gaborMatrix map alpha] = imread('single_gabor_75px.png');
@@ -80,10 +84,6 @@ centeredRects = [arrayCenters arrayCenters] + ...
 centeredRects = centeredRects';
 
 
-%pick soas
-soas = [-3:3];
-nsoas = length(soas)
-
 %outputs
 out_soa = [];
 out_direction = []; 
@@ -100,7 +100,8 @@ WaitSecs(1);
 
 %% experiment
 for k = -(practiceTrials+1):length(trialList)
-    
+    fprintf(num2str(k))
+    fprintf('\n')
     %pick SOA
     this_soa = soas(randi(nsoas));
 
