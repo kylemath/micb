@@ -49,7 +49,7 @@ timeLimit = 5;
 feedbackPause = .5;
 
 %pick soas
-soas = [-4:1:4];
+soas = [-3:1:3];
 nsoas = length(soas);
 
 %% Read in image
