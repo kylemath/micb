@@ -49,8 +49,8 @@ timeLimit = 5;
 feedbackPause = .5;
 
 %pick soas
-soas = [-10:2:10];
-nsoas = length(soas)
+soas = [-4:1:4];
+nsoas = length(soas);
 
 %% Read in image
 Screen('BlendFunction',w,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -205,7 +205,10 @@ for k = -(practiceTrials+1):length(trialList)
     Screen('FillRect',w,bgcolor,rect);
     Screen('Flip',w);
     WaitSecs(.1);
-    ShowCursor;
+    
+    ShowCursor('Arrow');
+    SetMouse(xc,yc)
+    
     Screen('FillRect',w,bgcolor,rect);
     DrawFormattedText(w,'Click the patch that rotated:','center',yc-r-g);
     Screen('DrawTextures',w,gaborPatch,[],centeredRects,rotation);
